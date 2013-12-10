@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>presto.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>presto.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>(<span class="function"><span class="keyword">function</span><span class="params">(undefined)</span>{</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <h1 id="presto">presto</h1>
+<p>presto is a JavaScript utility for interacting with JSON based REST APIs
+in a simple way.</p>
+<p>@param config a configuration that will overwrite the predefined configuration
+of presto.
+@param configurator a function that will receive presto’s configuration as its
+first and only argument and can dynamically modify it.</p>
+<p>presto’s configuration is as follows:</p>
+<pre><code> prestoConfig = {
+       prestoFields: {
+           <span class="string">'get'</span>: {name: <span class="string">'$get'</span>, fn: get},
+           <span class="string">'put'</span>: {name: <span class="string">'$put'</span>, fn: put},
+           <span class="string">'post'</span>: {name: <span class="string">'$post'</span>, fn: post},
+           <span class="string">'delete'</span>: {name: <span class="string">'$delete'</span>, fn: remove},
+           <span class="string">'serialize'</span>: {name: <span class="string">'$serialize'</span>, fn: serialize},
+           <span class="string">'one'</span>: {name: <span class="string">'$one'</span>, fn: one},
+           <span class="string">'all'</span>: {name: <span class="string">'$all'</span>, fn: all},
+           <span class="string">'path'</span>: {name: <span class="string">'$path'</span>}
+       },
+       ajax: {
+           dataType: <span class="string">'json'</span>,
+           contentType: <span class="string">'application/json; charset=utf-8'</span>
+       },
+       baseUrl: <span class="string">''</span>,
+       idAttribute: <span class="string">'id'</span>,
+       urlMap: {}
+   };</code></pre>
+<ul>
+<li><strong>baseUrl</strong>: the base url for the api. All urls to fetch other objects
+will start with this.</li>
+<li><p><strong>idAttribute</strong>: the attribute that holds the id of your models. <code>id</code> by default.
+If your model are like:</p>
+<p>  {</p>
+<pre><code>  ID: <span class="string">'1'</span>,
+  name: <span class="string">'bob'</span></code></pre>
+<p>  }</p>
+<p>then set idAttribute to <code>ID</code></p>
+</li>
+<li><p><strong>urlMap</strong>: lets you define names for specific urls.</p>
+<p>  var p = new presto({</p>
+<pre><code>  urlMap: {
+      users: <span class="string">'/api/admin/users'</span>
+  }</code></pre>
+<p>  })
+  p.$one(‘users’) // This is now the same as doing p.$one(‘/api/admin/users’)</p>
+</li>
+<li><p><strong>ajax</strong>: jQuery ajax config object</p>
+</li>
+<li><strong>prestoFields</strong>: The name of the fields and methods that presto will augment your model
+with. By default they are:</li>
+<li><ul>
+<li>$get</li>
+</ul>
+</li>
+<li><ul>
+<li>$put</li>
+</ul>
+</li>
+<li><ul>
+<li>$post</li>
+</ul>
+</li>
+<li><ul>
+<li>$delete</li>
+</ul>
+</li>
+<li><ul>
+<li>$serialize</li>
+</ul>
+</li>
+<li><ul>
+<li>$one</li>
+</ul>
+</li>
+<li><ul>
+<li>$all</li>
+</ul>
+</li>
+<li><ul>
+<li>$path</li>
+</ul>
+<p>By prefixing them with a <code>$</code>, we expect that there won’t be collisions with the
+attributes of your models in the API. However if your model contains a field named
+<code>$post</code>, then you could use the configurator function to rename it to <code>post</code>.</p>
+<p>  new presto({}, function(config){</p>
+<pre><code>  config.prestoFields.post.name = <span class="string">'post'</span></code></pre>
+<p>  })</p>
+</li>
+</ul>
+<p>@return a new presto instance</p>
+<p><strong>Example usage</strong>:</p>
+<pre><code> <span class="keyword">var</span> p = <span class="keyword">new</span> presto();
+ p.$one(<span class="string">'users'</span>, <span class="number">123</span>).$get().then(<span class="function"><span class="keyword">function</span><span class="params">(user)</span>{</span>
+     user.name = <span class="string">'bob'</span>;
+     user.$put().then(<span class="function"><span class="keyword">function</span><span class="params">(user)</span>{</span>
+         console.log(<span class="string">'user successfully updated'</span>);
+         user.$<span class="keyword">delete</span>().then(<span class="function"><span class="keyword">function</span><span class="params">()</span>{</span>
+             console.log(<span class="string">'user successfully deleted'</span>);
+         })
+     });
+ });
+ p.$all(<span class="string">'users'</span>).$post({name: <span class="string">'joe'</span>}).then(<span class="function"><span class="keyword">function</span><span class="params">(user)</span>{</span>
+     console.log(<span class="string">'I present you joe:'</span>);
+     console.log(user);
+ });
+ p.$one(<span class="string">'users'</span>, <span class="number">123</span>).$all(<span class="string">'cars'</span>).$get().then(<span class="function"><span class="keyword">function</span><span class="params">()</span>{</span>});
+ p.$one(<span class="string">'users'</span>, <span class="number">123</span>).$one(<span class="string">'cars'</span>, <span class="number">456</span>).$get();</code></pre>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">presto</span><span class="params">(config, configurator)</span> {</span>
+        <span class="keyword">var</span> prestoConfig = {
+            prestoFields: {
+                <span class="string">'get'</span>: {name: <span class="string">'$get'</span>, fn: get},
+                <span class="string">'put'</span>: {name: <span class="string">'$put'</span>, fn: put},
+                <span class="string">'post'</span>: {name: <span class="string">'$post'</span>, fn: post},
+                <span class="string">'delete'</span>: {name: <span class="string">'$delete'</span>, fn: remove},
+                <span class="string">'serialize'</span>: {name: <span class="string">'$serialize'</span>, fn: serialize},
+                <span class="string">'one'</span>: {name: <span class="string">'$one'</span>, fn: one},
+                <span class="string">'all'</span>: {name: <span class="string">'$all'</span>, fn: all},
+                <span class="string">'path'</span>: {name: <span class="string">'$path'</span>}
+            },
+            ajax: {
+                dataType: <span class="string">'json'</span>,
+                contentType: <span class="string">'application/json; charset=utf-8'</span>
+            },
+            baseUrl: <span class="string">''</span>,
+            idAttribute: <span class="string">'id'</span>,
+            urlMap: {}
+        };
+
+        prestoConfig = _.defaults(config || {}, prestoConfig);
+        (configurator || _.identity)(prestoConfig);
+
+        <span class="keyword">var</span> pathName = prestoConfig.prestoFields.path.name;
+        <span class="keyword">this</span>[pathName] = prestoConfig.baseUrl;
+
+        <span class="keyword">this</span>[prestoConfig.prestoFields.one.name] = _.bind(one, <span class="keyword">this</span>);
+        <span class="keyword">this</span>[prestoConfig.prestoFields.all.name] = _.bind(all, <span class="keyword">this</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <h2 id="one">one</h2>
+<p>Instantiates a presto object to retrieve a single resource based on a url and id</p>
+<p>@param url the url of the resource collection / list
+@param id the id of the specific resource</p>
+<p><strong>Example usage</strong>:</p>
+<pre><code> <span class="keyword">var</span> p = <span class="keyword">new</span> presto();
+ p.one(<span class="string">'users'</span>, <span class="number">12</span>).get();</code></pre>
+<p>This would trigger an api call to <code>http://domain.com/users/12</code></p>
+<p>@return a presto object</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="function"><span class="keyword">function</span> <span class="title">one</span><span class="params">(url, id)</span> {</span>
+            <span class="keyword">var</span> ret = {};
+            bindOne(ret, <span class="keyword">this</span>);
+
+            <span class="keyword">var</span> path = <span class="keyword">this</span>[pathName] ? <span class="keyword">this</span>[pathName] + <span class="string">'/'</span> : <span class="string">''</span>;
+            url = prestoConfig.urlMap[url] || url;
+            ret[pathName] = makeUrl(path + url + <span class="string">'/'</span> + id);
+
+            <span class="keyword">return</span> ret;
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <h2 id="all">all</h2>
+<p>Instantiates a presto object to retrieve a list of resources based on a url</p>
+<p>@param url the url of the resource collection / list</p>
+<p><strong>Example usage</strong>:</p>
+<pre><code> <span class="keyword">var</span> p = <span class="keyword">new</span> presto();
+ p.all(<span class="string">'users'</span>).get();</code></pre>
+<p>This would trigger an api call to <code>http://domain.com/users</code></p>
+<p>Calls to <code>one</code> and <code>all</code> can be piped to access child resources:</p>
+<pre><code> <span class="keyword">var</span> p = <span class="keyword">new</span> presto();
+ p.one(<span class="string">'users'</span>, <span class="number">123</span>).all(<span class="string">'cars'</span>).get();</code></pre>
+<p>Would trigger an API call to <code>http://domain.com/users/123/cars</code></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="function"><span class="keyword">function</span> <span class="title">all</span><span class="params">(url)</span> {</span>
+            <span class="keyword">var</span> ret = {};
+            bindOne(ret, <span class="keyword">this</span>);
+
+            <span class="keyword">var</span> path = <span class="keyword">this</span>[pathName] ? <span class="keyword">this</span>[pathName] + <span class="string">'/'</span> : <span class="string">''</span>;
+            url = prestoConfig.urlMap[url] || url;
+            ret[pathName] = makeUrl(path + url);
+
+            <span class="keyword">return</span> ret;
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <h2 id="bindfunctions">bindFunctions</h2>
+<p>Not exposed as public API.</p>
+<p>Binds all prestoFields functions to a new presto object</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="function"><span class="keyword">function</span> <span class="title">bindFunctions</span><span class="params">(object, config)</span> {</span>
+            _.each(_.keys(config.prestoFields), <span class="function"><span class="keyword">function</span><span class="params">(key)</span>{</span>
+                <span class="keyword">var</span> field = config.prestoFields[key];
+                <span class="keyword">if</span> (field.fn) {
+                    object[field.name] = _.bind(field.fn, object);
+                }
+            });
+            <span class="keyword">return</span> object;
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <h2 id="bindone">bindOne</h2>
+<p>Not exposed as public API.</p>
+<p>Binds all presto fields and functions to a new presto object</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="function"><span class="keyword">function</span> <span class="title">bindOne</span><span class="params">(object, original)</span> {</span>
+            bindFunctions(object, prestoConfig);
+
+            <span class="keyword">var</span> simpleFields = [];
+            <span class="keyword">var</span> fields = prestoConfig.prestoFields;
+            _.each(_.keys(fields), <span class="function"><span class="keyword">function</span><span class="params">(key)</span>{</span>
+                <span class="keyword">if</span> (!fields[key].fn) {
+                    simpleFields.push(fields[key].name);
+                }
+            });
+            _.defaults(object, _.pick(original, simpleFields));
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <h2 id="bindall">bindAll</h2>
+<p>Not exposed as public API.</p>
+<p>Binds all presto fields and functions to an array as well as to all objects
+in the array.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="function"><span class="keyword">function</span> <span class="title">bindAll</span><span class="params">(list, original)</span> {</span>
+            _.each(list, <span class="function"><span class="keyword">function</span><span class="params">(item)</span>{</span>
+                bindOne(item, original);
+                item[pathName] = makeUrl(item[pathName] + <span class="string">'/'</span> + item[prestoConfig.idAttribute]);
+            });
+        }
+
+        <span class="function"><span class="keyword">function</span> <span class="title">serialize</span><span class="params">()</span> {</span>
+            <span class="keyword">if</span> (!_.isArray(<span class="keyword">this</span>)) {
+                <span class="keyword">var</span> fields = prestoConfig.prestoFields;
+                <span class="keyword">var</span> omits = [];
+                _.each(_.keys(fields), <span class="function"><span class="keyword">function</span><span class="params">(key)</span>{</span>
+                    omits.push(fields[key].name);
+                });
+
+                <span class="keyword">return</span> JSON.stringify(_.omit(<span class="keyword">this</span>, omits));
+            }
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <h2 id="makeurl">makeUrl</h2>
+<p>Not exposed as public API.</p>
+<p>Make a url based on a path and query object.</p>
+<p>@param path the base url path
+@param query a hash object of all values to input in the query string.</p>
+<p><strong>Example usage</strong>:</p>
+<pre><code> makeUrl(<span class="string">'/api/users/123'</span>)
+ <span class="comment">// =&gt; '/api/users/123'</span>
+ makeUrl(<span class="string">'/api/users/123'</span>, {name: <span class="string">'bob'</span>, max: <span class="number">10</span>})
+ <span class="comment">// =&gt; '/api/users/123?name=bob&amp;max=10'</span></code></pre>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="function"><span class="keyword">function</span> <span class="title">makeUrl</span><span class="params">(path, query)</span> {</span>
+            <span class="keyword">if</span> (query) {
+                path += <span class="string">'?'</span> + $.param(query);
+            }
+
+            <span class="keyword">return</span> path.replace(<span class="string">'//'</span>, <span class="string">'/'</span>);
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <h2 id="allhttp">allHttp</h2>
+<p>Not exposed as public API.</p>
+<p>Used by all other HTTP methods (get, post, put, delete) to handle the
+ajax request.</p>
+<p>@param ajaxConfig complete jQuery ajax config
+@param object the object currently triggering this ajax call</p>
+<p>@return jQuery promise</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="function"><span class="keyword">function</span> <span class="title">allHttp</span><span class="params">(ajaxConfig, object)</span> {</span>
+            <span class="keyword">var</span> promise = $.ajax(ajaxConfig);
+
+            promise.then(<span class="function"><span class="keyword">function</span><span class="params">(data)</span> {</span>
+                <span class="keyword">if</span> (_.isArray(data)) {
+                    bindAll(data, object);
+                }
+                bindOne(data, object);
+            });
+
+            <span class="keyword">return</span> promise;
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <h2 id="get">get</h2>
+<p>Trigger a get request to the api.</p>
+<p>@param query a hash object to be converted to a query string.
+@return jQuery promise</p>
+<p><strong>Example usage</strong>:</p>
+<pre><code> <span class="keyword">var</span> p = <span class="keyword">new</span> presto();
+ p.all(<span class="string">'users'</span>).get({start: <span class="number">30</span>, max: <span class="number">10</span>}).then(<span class="function"><span class="keyword">function</span><span class="params">(data)</span>{</span>
+     <span class="comment">// Do something with the retrieved data</span>
+ });</code></pre>
+<p>Would issue a request to <code>http://domain.com/users?start=30&amp;max=10</code></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="function"><span class="keyword">function</span> <span class="title">get</span><span class="params">(query)</span> {</span>
+            <span class="keyword">var</span> ajaxConfig = {
+                url: makeUrl(<span class="keyword">this</span>[pathName], query),
+                method: <span class="string">'GET'</span>
+            };
+            ajaxConfig = _.defaults(ajaxConfig, prestoConfig.ajax);
+
+            <span class="keyword">return</span> allHttp(ajaxConfig, <span class="keyword">this</span>);
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <h2 id="post">post</h2>
+<p>Posts new data to the api. As post is for the creation of new resources,
+the data must be passed as a parameter. The data of the current presto
+object will not be used.</p>
+<p>@param the data to be posted
+@param query (see <code>get</code>)
+@return jQuery promise</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="function"><span class="keyword">function</span> <span class="title">post</span><span class="params">(data, query)</span> {</span>
+            <span class="keyword">var</span> ajaxConfig = {
+                url: makeUrl(<span class="keyword">this</span>[pathName], query),
+                method: <span class="string">'POST'</span>,
+                data: JSON.stringify(data),
+                dataType: <span class="string">'json'</span>,
+                contentType: <span class="string">'application/json; charset=utf-8'</span>
+            };
+            ajaxConfig = _.defaults(ajaxConfig, prestoConfig.ajax);
+
+            <span class="keyword">return</span> allHttp(ajaxConfig, <span class="keyword">this</span>);
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <h2 id="put">put</h2>
+<p>Update the new value of current object to the server.</p>
+<p>@param query
+@return jQuery promise</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="function"><span class="keyword">function</span> <span class="title">put</span><span class="params">(query)</span> {</span>
+            <span class="keyword">var</span> ajaxConfig = {
+                url: makeUrl(<span class="keyword">this</span>[pathName], query),
+                method: <span class="string">'PUT'</span>,
+                data: <span class="keyword">this</span>.$serialize(),
+                dataType: <span class="string">'json'</span>,
+                contentType: <span class="string">'application/json; charset=utf-8'</span>
+            };
+            ajaxConfig = _.defaults(ajaxConfig, prestoConfig.ajax);
+
+            <span class="keyword">return</span> allHttp(ajaxConfig, <span class="keyword">this</span>);
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <h2 id="remove">remove</h2>
+<p>By default this is mapped to <code>$delete</code></p>
+<p>@return jQuery promise</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="function"><span class="keyword">function</span> <span class="title">remove</span><span class="params">(query)</span> {</span>
+            <span class="keyword">var</span> ajaxConfig = {
+                url: makeUrl(<span class="keyword">this</span>[pathName], query),
+                method: <span class="string">'DELETE'</span>,
+                contentType: <span class="string">'application/json; charset=utf-8'</span>,
+                dataType: <span class="string">'json'</span>
+            };
+            ajaxConfig = _.defaults(ajaxConfig, prestoConfig.ajax);
+
+            <span class="keyword">return</span> allHttp(ajaxConfig, <span class="keyword">this</span>);
+        }
+    }
+
+    <span class="comment">/************************************
+        Exposing presto
+    ************************************/</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>CommonJS module is defined</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> hasModule = (<span class="keyword">typeof</span> module !== <span class="string">'undefined'</span> &amp;&amp; module.exports);
+    <span class="keyword">if</span> (hasModule) {
+        module.exports = presto;
+    }
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> ender === <span class="string">'undefined'</span>) {
+        <span class="keyword">this</span>.presto = presto;
+    }
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> define === <span class="string">"function"</span> &amp;&amp; define.amd) {
+        define(<span class="string">"presto"</span>, [], <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+            <span class="keyword">return</span> presto;
+        });
+    }
+
+}).call(<span class="keyword">this</span>);</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

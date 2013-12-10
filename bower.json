@@ -1,0 +1,27 @@
+{
+  "name": "presto",
+  "version": "0.1.0",
+  "authors": [
+    "khepin <khepin@gmail.com>"
+  ],
+  "description": "Browser JS library for interacting with REST services",
+  "main": "wrestle.js",
+  "keywords": [
+    "REST"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~2.0.3",
+    "lodash": "~2.4.1"
+  },
+  "devDependencies": {
+    "jasmine": "*"
+  }
+}

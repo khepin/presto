@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "grunt": "*",
+    "grunt-contrib-clean": "*",
+    "grunt-contrib-jshint": "*",
+    "grunt-contrib-uglify": "*",
+    "grunt-contrib-copy": "*",
+    "grunt-contrib-jasmine": "*",
+    "grunt-docco2": "*",
+    "grunt-cli": "*",
+    "grunt-contrib-copy": "*"
+  },
+  "scripts": {
+    "test": "grunt jasmine"
+  }
+}
